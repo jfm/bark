@@ -1,21 +1,19 @@
 import sys
 import shutil
 import curses
-import logging
 from curses.textpad import Textbox
 from bark.ui.rendering import Render
+from bark.util.logger import Logger
 
 class BarkCurses:
 
     def __init__(self, api):
         self.api = api
         self.renderer = Render()
-        self.logger = logging.getLogger(__file__)
-        hdlr = logging.FileHandler(__file__ + ".log")
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        hdlr.setFormatter(formatter)
-        self.logger.addHandler(hdlr)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger = Logger(__file__)
+        self.tweets = []
+        self.printed_lines = 0
+        self.progress = None
 
     def main(self, stdscr):
         terminal_size = shutil.get_terminal_size()
@@ -30,17 +28,18 @@ class BarkCurses:
 
         #Create the Prompt
         credentials = self.api.VerifyCredentials()
-        prompt_win, prompt_width = self.create_prompt_win(credentials.name)
+        prompt_win, prompt_width = self.create_prompt_win(credentials.screen_name)
         prompt_win.refresh()
 
         #Create Input window
         edit_line_win = self.create_edit_line_win(prompt_width)
-        box = Textbox(edit_line_win)
+        box = BarkTextbox(edit_line_win, self)
         box.stripspaces = 1
+        
+        #Refresh tweets and start loop
         self.do_refresh()
         while True:
-            box.edit()
-            message = box.gather()
+            message = box.edit()
             edit_line_win.clear()
             self.handle_command(message)
 
@@ -63,42 +62,92 @@ class BarkCurses:
             self.do_refresh()
         elif stripped_message.lower() == "exit":
             sys.exit()
+        else:
+            self.logger.debug('unknown command')
+
+    def do_page_up(self):
+        self.logger.debug('Doing Page Up %d' % self.scroll_current)
+        scroll_new = self.scroll_current-(self.terminal_height-1)
+        if scroll_new < 0:
+            scroll_new = 0
+        self.scroll_to(scroll_new)
+
+    def do_page_down(self):
+        scroll_max = self.printed_lines - (self.terminal_height-2)
+        self.logger.debug('Doing Page Down %d' % self.scroll_current)
+        scroll_new = self.scroll_current+(self.terminal_height-1)
+        if scroll_new > scroll_max:
+            scroll_new = scroll_max
+        self.scroll_to(scroll_new)
 
     def do_refresh(self):
-        time_line_statuses = self.api.GetHomeTimeline(count=50)
+        self.logger.debug('REFRESH: progress = %s' % self.progress)
+        time_line_statuses = self.api.GetHomeTimeline(count=100, since_id=self.progress)
+
+        #Set the column width of the Time Column
         time_column_width = 9
-        username_column_width = self.renderer.get_longest_username(time_line_statuses)
+
+        #Set the column width of the Username Column
+        if time_line_statuses is not None:
+            usernames = []
+            for tweet in self.tweets:
+                usernames.append(tweet['username'])
+            for status in time_line_statuses:
+                usernames.append(status.user.screen_name)
+
+            username_column_width = self.renderer.get_longest_username(usernames)
+
+        #Set the column width of the Text Column
         text_column_width = self.terminal_width - username_column_width - 12
-        tweets = []
+
+        #Build the rendered tweet objects
         for status in reversed(time_line_statuses):
             tweet = self.renderer.render_tweet(status, text_column_width)
-            tweets.append(tweet)
+            self.tweets.append(tweet)
+            self.progress = tweet['id']
 
-        pminrow = self.terminal_height - 1
+        self.timeline_win.clear()
+        self.printed_lines = self.print_tweets(time_column_width, username_column_width, self.tweets)
+        self.scroll_to(self.printed_lines-(self.terminal_height-1))
+
+    def scroll_to(self, row):
+        self.scroll_current = row
+        pminrow = self.scroll_current
         pmincol = 0
         sminrow = 0
         smincol = 0
         smaxrow = self.terminal_height - 2
         smaxcol = self.terminal_width
-        self.logger.debug('pminrow = %d' % pminrow)
-        self.logger.debug('pmincol = %d' % pmincol)
-        self.logger.debug('sminrow = %d' % sminrow)
-        self.logger.debug('smincol = %d' % smincol)
-        self.logger.debug('smaxrow = %d' % smaxrow)
-        self.logger.debug('smaxcol = %d' % smaxcol)
-        first_line = len(tweets)-smaxrow
-        last_line = len(tweets)
-        self.timeline_win.clear()
-        printed_lines = self._print_tweets(time_column_width, username_column_width, first_line, last_line, tweets)
-        self.timeline_win.refresh(pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol)
+        self.logger.debug('PAD REFRESH: pminrow = %d, pmincol = %d, sminrow = %d, smincol = %d, smaxrow = %d, smaxcol = %d' % (pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol))
+        self.logger.debug('printed = %d' % self.printed_lines)
+        if pminrow >= 0 and pminrow < self.printed_lines:
+            self.timeline_win.refresh(pminrow, pmincol, sminrow, smincol, smaxrow, smaxcol)
 
-    def _print_tweets(self, time_column_width, username_column_width, first_line, last_line, tweets):
+
+    def print_tweets(self, time_column_width, username_column_width, tweets):
         first_column_width = time_column_width + username_column_width + 2
         printed_lines = 0
         for tweet in tweets:
             self.timeline_win.addstr('%s %s | %s\n' % (tweet['time'], tweet['username'].rjust(username_column_width), tweet['tweet_lines'][0]))
-            printed_lines += printed_lines
+            printed_lines = printed_lines + 1
             for line in tweet['tweet_lines'][1:]:
                 self.timeline_win.addstr('%s %s\n' % ('|'.rjust(first_column_width), line))
-                printed_lines += printed_lines
+                printed_lines = printed_lines + 1
         return printed_lines
+
+
+class BarkTextbox(Textbox):
+    def __init__(self, win, app):
+        self.logger = Logger(__file__)
+        self.app = app
+        super().__init__(win)
+
+    def do_command(self, ch):
+        if ch == 338:
+            self.app.do_page_down()
+            return True
+        elif ch == 339:
+            self.app.do_page_up()
+            return True
+        else:
+            return super().do_command(ch)

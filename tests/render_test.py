@@ -11,8 +11,9 @@ def test_break_up_text():
 
 def test_get_longest_username():
     render = Render()
-    length = render.get_longest_username(test_statuses)
-    assert length == 15
+    usernames = ['12345', '123456', '23456']
+    length = render.get_longest_username(usernames)
+    assert length == 6
 
 def test_render_text():
     render = Render()
