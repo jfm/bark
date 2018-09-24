@@ -5,9 +5,10 @@ name = "pypi"
 
 [packages]
 python-twitter = "*"
-pytest = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.7"
