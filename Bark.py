@@ -8,7 +8,7 @@ from bark.config.config import BarkConfig
 
 class Bark:
     def main(self):
-        bark_config = BarkConfig()
+        bark_config = BarkConfig(None)
         CONSUMER_KEY = bark_config.get_value('API', 'consumer_key')
         CONSUMER_SECRET = bark_config.get_value('API', 'consumer_secret')
         ACCESS_TOKEN = bark_config.get_value('API', 'access_token')

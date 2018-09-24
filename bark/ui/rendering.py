@@ -1,10 +1,10 @@
 import datetime
-from bark.util.logger import Logger
+from bark.util.logger import BarkLogger
 
 class Render:
 
     def __init__(self):
-        self.logger = Logger(__file__)
+        self.logger = BarkLogger(__file__)
 
     def render_tweet(self, status, text_width):
         tweet = {}
