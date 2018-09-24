@@ -1,3 +1,4 @@
+bark/config/consumer.py
 .pytest_cache
 .ycm_extra_conf.py
 bark.conf

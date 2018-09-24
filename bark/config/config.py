@@ -25,7 +25,10 @@ class BarkConfig:
         self.config_parser.read(str(self.config_file))
 
     def get_value(self, section, key):
-        return self.config_parser[section][key]
+        if self.config_parser.has_option(section, key):
+            return self.config_parser[section][key]
+        else:
+            return None
 
     def set_value(self, section, key, value):
         cfgfile = open(str(self.config_file), 'w')
