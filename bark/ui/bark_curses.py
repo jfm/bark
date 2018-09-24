@@ -2,15 +2,17 @@ import sys
 import shutil
 import curses
 from curses.textpad import Textbox
+from bark.config.config import BarkConfig
 from bark.ui.rendering import Render
-from bark.util.logger import Logger
+from bark.util.logger import BarkLogger
 
 class BarkCurses:
 
     def __init__(self, api):
         self.api = api
         self.renderer = Render()
-        self.logger = Logger(__file__)
+        self.config = BarkConfig(None)
+        self.logger = BarkLogger(__file__)
         self.tweets = []
         self.printed_lines = 0
         self.progress = None
@@ -33,13 +35,13 @@ class BarkCurses:
 
         #Create Input window
         edit_line_win = self.create_edit_line_win(prompt_width)
-        box = BarkTextbox(edit_line_win, self)
+        box = Textbox(edit_line_win, self)
         box.stripspaces = 1
-        
+
         #Refresh tweets and start loop
         self.do_refresh()
         while True:
-            message = box.edit()
+            message = box.edit(validate=self.validate_input)
             edit_line_win.clear()
             self.handle_command(message)
 
@@ -56,29 +58,53 @@ class BarkCurses:
         win = curses.newwin(1, self.terminal_width, self.terminal_height-1, prompt_width)
         return win
 
+    def validate_input(self, char):
+        if char == 338:
+            self.do_page_down()
+        elif char == 339:
+            self.do_page_up()
+        return char
+
     def handle_command(self, message):
-        stripped_message = message.strip()
-        if stripped_message.lower() == "refresh":
-            self.do_refresh()
-        elif stripped_message.lower() == "exit":
-            sys.exit()
+        if len(message) > 0:
+            command_words = message.split()
+            command = command_words[0].lower()
+            self.logger.debug('Got Command: %s' % command)
+            if command == "/refresh":
+                self.do_refresh()
+            elif command == "/tweet":
+                self.do_tweet(command_words[1:])
+            elif command == "/exit":
+                sys.exit()
+            else:
+                self.logger.debug('unknown command')
         else:
-            self.logger.debug('unknown command')
+            self.logger.debug('Empty command')
 
     def do_page_up(self):
         self.logger.debug('Doing Page Up %d' % self.scroll_current)
-        scroll_new = self.scroll_current-(self.terminal_height-1)
+        scroll_new = self.scroll_current-(self.terminal_height)
         if scroll_new < 0:
             scroll_new = 0
         self.scroll_to(scroll_new)
 
     def do_page_down(self):
-        scroll_max = self.printed_lines - (self.terminal_height-2)
+        scroll_max = self.printed_lines - (self.terminal_height) + 1
         self.logger.debug('Doing Page Down %d' % self.scroll_current)
-        scroll_new = self.scroll_current+(self.terminal_height-1)
+        scroll_new = self.scroll_current+(self.terminal_height)
         if scroll_new > scroll_max:
             scroll_new = scroll_max
         self.scroll_to(scroll_new)
+
+    def do_tweet(self, words):
+        tweet_message = ''
+        for word in words:
+            tweet_message = tweet_message + word + ' '
+
+        if self.config.get_value('CONFIGURATION','simulate_tweeting') == 'false':
+            self.api.PostUpdate(tweet_message.strip())
+        else:
+            self.logger.info('Would have tweeted: |%s|' % tweet_message.strip())
 
     def do_refresh(self):
         self.logger.debug('REFRESH: progress = %s' % self.progress)
@@ -108,7 +134,7 @@ class BarkCurses:
 
         self.timeline_win.clear()
         self.printed_lines = self.print_tweets(time_column_width, username_column_width, self.tweets)
-        self.scroll_to(self.printed_lines-(self.terminal_height-1))
+        self.scroll_to(self.printed_lines-(self.terminal_height) + 1)
 
     def scroll_to(self, row):
         self.scroll_current = row
@@ -134,20 +160,3 @@ class BarkCurses:
                 self.timeline_win.addstr('%s %s\n' % ('|'.rjust(first_column_width), line))
                 printed_lines = printed_lines + 1
         return printed_lines
-
-
-class BarkTextbox(Textbox):
-    def __init__(self, win, app):
-        self.logger = Logger(__file__)
-        self.app = app
-        super().__init__(win)
-
-    def do_command(self, ch):
-        if ch == 338:
-            self.app.do_page_down()
-            return True
-        elif ch == 339:
-            self.app.do_page_up()
-            return True
-        else:
-            return super().do_command(ch)
