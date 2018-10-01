@@ -4,7 +4,7 @@ INSERT SCREENSHOT
 ## Installation
 TODO: Describe how to install once setup.py has been created
 
-### Dendencies
+### Dependencies
 [python-twitter](https://github.com/bear/python-twitter)
 
 ## Commands
@@ -22,8 +22,7 @@ To code on Bark you should be able to just do:
 ```shell
 $ git clone https://github.com/jfm/bark.git
 $ cd bark
-$ pipenv shell
-$ pipenv install python-twitter
+$ pipenv install --dev 
 ```
 
 ### Twitter API keys
