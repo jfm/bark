@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 from bark.util.logger import BarkLogger
 
 class Render:
@@ -15,7 +16,7 @@ class Render:
         return tweet
 
     def render_time(self, created_at):
-        timestamp = datetime.datetime.strptime(created_at, "%a %b %d %H:%M:%S %z %Y")
+        timestamp = self._utc_to_local(datetime.datetime.strptime(created_at, "%a %b %d %H:%M:%S %z %Y"))
         return timestamp.strftime('%H:%M:%S')
 
     def render_username(self, username):
@@ -47,3 +48,7 @@ class Render:
         lines.append(line)
 
         return lines
+
+    def _utc_to_local(self, utc_dt):
+        localtime = utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        return localtime
