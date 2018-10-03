@@ -1,5 +1,5 @@
 # Bark - The Twitter timeline in your terminal
-INSERT SCREENSHOT
+![Screenshot](screenshot.png)
 
 ## Installation
 TODO: Describe how to install once setup.py has been created
