@@ -100,7 +100,7 @@ class BarkCurses:
         tweet_message = ''
         for word in words:
             tweet_message = tweet_message + word + ' '
-
+        
         if self.config.get_value('CONFIGURATION','simulate_tweeting') == 'false':
             self.api.PostUpdate(tweet_message.strip())
         else:
