@@ -41,11 +41,11 @@ def test_render_username():
 def test_render_time():
     render = Render()
     time = render.render_time(test_statuses[0].created_at)
-    assert time == '06:03:11'
+    assert time == '08:03:11'
 
 def test_render_tweet():
     render = Render()
     tweet = render.render_tweet(test_statuses[0], 20)
-    assert tweet['time'] == '06:03:11'
+    assert tweet['time'] == '08:03:11'
     assert tweet['username'] == 'rustyshelf'
     assert len(tweet['tweet_lines']) == 8
