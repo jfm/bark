@@ -1,6 +1,9 @@
 # Bark - The Twitter timeline in your terminal
 ![Screenshot](screenshot.png)
 
+# Project Status
+[![CircleCI](https://circleci.com/gh/jfm/bark.svg?style=svg)](https://circleci.com/gh/jfm/bark)
+
 ## Installation
 TODO: Describe how to install once setup.py has been created
 
