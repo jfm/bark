@@ -111,7 +111,7 @@ venv.bak/
 dmypy.json
 
 # bark
-bark/config/consumer.py
+#bark/config/consumer.py
 bark.conf
 
 # ycm
