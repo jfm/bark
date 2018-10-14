@@ -1,4 +1,5 @@
 import shutil
+import sys
 from bark.config.config import BarkConfig
 from bark.util.logger import BarkLogger
 from bark.ui.title_widget import TitleWidget
@@ -43,6 +44,7 @@ class BarkUI:
         self.refresh_stream()
         while True:
             command = self.command_widget.get_command(self.validate_input)
+            self.handle_command(command)
 
     def validate_input(self, char):
         if char == 338:
@@ -50,6 +52,22 @@ class BarkUI:
         elif char == 339:
             self.do_page_up()
         return char
+
+    def handle_command(self, message):
+        if len(message) > 0:
+            command_words = message.split()
+            command = command_words[0].lower()
+            self.logger.debug('Got Command: %s' % command)
+            if command == "/refresh":
+                self.refresh_stream()
+            elif command == "/tweet":
+                self.do_tweet(command_words[1:])
+            elif command == "/exit":
+                sys.exit()
+            else:
+                self.logger.debug('unknown command')
+        else:
+            self.logger.debug('Empty command')
 
     def do_page_up(self):
         self.logger.debug('Doing Page Up %d' % self.stream_widget.scroll_current)
@@ -65,6 +83,16 @@ class BarkUI:
         if scroll_new > scroll_max:
             scroll_new = scroll_max
         self.stream_widget.scroll_to(scroll_new)
+
+    def do_tweet(self, words):
+        tweet_message = ''
+        for word in words:
+            tweet_message = tweet_message + word + ' '
+        
+        if self.config.get_value('CONFIGURATION','simulate_tweeting') == 'false':
+            self.api.PostUpdate(tweet_message.strip())
+        else:
+            self.logger.info('Would have tweeted: |%s|' % tweet_message.strip())
 
     def refresh_stream(self):
         time_line_statuses = self.api.GetHomeTimeline(count=100, since_id=self.progress)
