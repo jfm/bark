@@ -44,6 +44,9 @@ jobs:
           name: run tests
           command: |
             pipenv run python -m pytest
+          environment:
+            TERM: linux
+            TERMINFO: /etc/terminfo
 
       - store_artifacts:
           path: test-reports
