@@ -11,3 +11,7 @@ class PromptWidget:
         self.prompt_win = curses.newwin(1, self.prompt_width, begin_y, begin_x)
         self.prompt_text = '[@'+username+']'
         self.prompt_win.addstr(self.prompt_text)
+        self.prompt_win.refresh()
+
+    def get_prompt_width(self):
+        return len(self.prompt_text)+1

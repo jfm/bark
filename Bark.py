@@ -1,14 +1,13 @@
-#!/bin/python
-import pickle
 import curses
 import twitter
-from twitter.models import Status
-from bark.ui.bark_curses import BarkCurses
+from bark.ui.bark_ui import BarkUI
 from bark.config.config import BarkConfig
 from bark.config.auth import PinAuthentication
 from bark.config.consumer import BarkConsumer
 
-class Bark:
+
+class NewBark:
+
     def main(self):
         bark_consumer = BarkConsumer()
         pin_auth = PinAuthentication()
@@ -34,10 +33,12 @@ class Bark:
 
         if CONSUMER_KEY is not None:
             api = twitter.Api(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET, access_token_key=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET)
-            bark = BarkCurses(api)
-            curses.wrapper(bark.main)
+            barkui = BarkUI(api)
+            curses.wrapper(barkui.build_ui)
         else:
             print('Looks like you are running a git version. Please get your consumer key and secret from Twitter and add them to the configuration file')
 
+
+
 if __name__ == '__main__':
-    Bark().main()
+    NewBark().main()

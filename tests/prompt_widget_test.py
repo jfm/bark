@@ -9,4 +9,5 @@ class TestPromptWidget:
     def test_correct_prompt(self):
         assert self.prompt_widget.prompt_text == '[@username]'
 
-
+    def test_get_prompt_width(self):
+        assert self.prompt_widget.get_prompt_width() == 12

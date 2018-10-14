@@ -15,4 +15,5 @@ class TitleWidget:
             title_text = title_text[:self.terminal_width-4] + '...'
         
         self.title_win.addstr(title_text)
+        self.title_win.refresh()
         return title_text

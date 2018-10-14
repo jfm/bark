@@ -1,5 +1,6 @@
 import shutil
 import curses
+from curses.textpad import Textbox
 
 class CommandWidget:
 
@@ -8,7 +9,7 @@ class CommandWidget:
         self.terminal_width = terminal_size[0]
         self.terminal_height = terminal_size[1]
         self.command_win = curses.newwin(1, self.terminal_width, begin_y, begin_x)
-        self.command_box = Textbox(command_win, self)
+        self.command_box = Textbox(self.command_win, self)
         self.command_box.stripspaces = 1
 
     def get_command(self, validation_method):
