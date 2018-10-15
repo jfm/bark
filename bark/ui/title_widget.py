@@ -7,13 +7,14 @@ class TitleWidget:
         self.terminal_width = terminal_size[0]
         self.terminal_height = terminal_size[1]
         self.title_win = curses.newwin(1, self.terminal_width, begin_y, begin_x)
+        self.title_win.bkgd(' ', curses.color_pair(1))
         self.set_title(title_text)
-    
+
     def set_title(self, title_text):
         self.title_win.clear()
         if len(title_text) > self.terminal_width:
             title_text = title_text[:self.terminal_width-4] + '...'
-        
+
         self.title_win.addstr(title_text)
         self.title_win.refresh()
         return title_text

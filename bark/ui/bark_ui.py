@@ -1,5 +1,6 @@
 import shutil
 import sys
+import curses
 from bark.config.config import BarkConfig
 from bark.util.logger import BarkLogger
 from bark.ui.title_widget import TitleWidget
@@ -10,14 +11,13 @@ from bark.ui.status_widget import StatusWidget
 
 
 class BarkUI:
- 
+
     def __init__(self, api):
         self.api = api
         self.config = BarkConfig(None)
         self.logger = BarkLogger(__file__)
         self.printed_lines = 0
         self.progress = None
-
     def build_ui(self, stdscr):
         terminal_size = shutil.get_terminal_size()
         self.terminal_width = terminal_size[0]
@@ -25,6 +25,10 @@ class BarkUI:
 
         # Clear screen
         stdscr.clear()
+        if curses.has_colors():
+            curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+            curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
+            curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
 
         # Add Title Widget
         self.title_widget = TitleWidget('Bark Twitter Client', 0, 0)
@@ -88,7 +92,7 @@ class BarkUI:
         tweet_message = ''
         for word in words:
             tweet_message = tweet_message + word + ' '
-        
+
         if self.config.get_value('CONFIGURATION','simulate_tweeting') == 'false':
             self.api.PostUpdate(tweet_message.strip())
         else:
