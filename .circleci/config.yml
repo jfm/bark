@@ -43,7 +43,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            pipenv run python -m pytest
+            pipenv run python -m pytest --junitxml=test-reports/test_report.xml
           environment:
             TERM: linux
             TERMINFO: /etc/terminfo
