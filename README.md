@@ -5,7 +5,14 @@
 [![CircleCI](https://circleci.com/gh/jfm/bark.svg?style=svg)](https://circleci.com/gh/jfm/bark)
 
 ## Installation
-TODO: Describe how to install once setup.py has been created
+To  try out Bark do the following
+```shell
+$ git clone https://github.com/jfm/bark.git
+$ cd bark
+$ pipenv install
+$ pipenv run python Bark.py
+```
+This should be easier in the future but for now this should work
 
 ### Dependencies
 [python-twitter](https://github.com/bear/python-twitter)
@@ -25,7 +32,7 @@ To code on Bark you should be able to just do:
 ```shell
 $ git clone https://github.com/jfm/bark.git
 $ cd bark
-$ pipenv install --dev 
+$ pipenv install --dev
 ```
 
 ### Twitter API keys
