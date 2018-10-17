@@ -6,7 +6,7 @@ from bark.config.auth import PinAuthentication
 from bark.config.consumer import BarkConsumer
 
 
-class NewBark:
+class Bark:
 
     def main(self):
         bark_consumer = BarkConsumer()
@@ -41,4 +41,4 @@ class NewBark:
 
 
 if __name__ == '__main__':
-    NewBark().main()
+    Bark().main()

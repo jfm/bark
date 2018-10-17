@@ -18,6 +18,7 @@ class BarkUI:
         self.logger = BarkLogger(__file__)
         self.printed_lines = 0
         self.progress = None
+
     def build_ui(self, stdscr):
         terminal_size = shutil.get_terminal_size()
         self.terminal_width = terminal_size[0]
@@ -93,10 +94,14 @@ class BarkUI:
         for word in words:
             tweet_message = tweet_message + word + ' '
 
-        if self.config.get_value('CONFIGURATION','simulate_tweeting') == 'false':
-            self.api.PostUpdate(tweet_message.strip())
+        if len(tweet_message) < 240:
+            if self.config.get_value('CONFIGURATION','simulate_tweeting') == 'false':
+                self.api.PostUpdate(tweet_message.strip())
+            else:
+                self.logger.info('Would have tweeted: |%s|' % tweet_message.strip())
+            self.status_widget.set_status_text("Tweet send!")
         else:
-            self.logger.info('Would have tweeted: |%s|' % tweet_message.strip())
+            self.status_widget.set_status_text("Tweet too long (%d characters)" % len(tweet_message))
 
     def refresh_stream(self):
         time_line_statuses = self.api.GetHomeTimeline(count=100, since_id=self.progress)
