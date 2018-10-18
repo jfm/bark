@@ -23,6 +23,8 @@ For now the following commands have been implemented
 ```
 /refresh - Refreshes the timeline
 /tweet [message] - Tweets the message after the command.
+/heart [index] - Hearts the message with that index
+/retweet [index] - Retweets the message with that index
 /exit - Exits the application
 ```
 
