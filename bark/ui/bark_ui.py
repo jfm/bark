@@ -18,6 +18,7 @@ class BarkUI:
         self.logger = BarkLogger(__file__)
         self.printed_lines = 0
         self.progress = None
+        self.tweets = []
 
     def build_ui(self, stdscr):
         terminal_size = shutil.get_terminal_size()

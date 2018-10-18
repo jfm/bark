@@ -43,6 +43,15 @@ class TestBarkUIClass:
         bark.do_tweet("Message More than 240 characters long will cause us to set a status message which explains that the message was too long to be tweeted. Hopefully this will very rarely happen as people really should not write too long tweets. But we all know they will at some point.")
         bark.status_widget.set_status_text.assert_called()
 
+    def test_do_heart(self, mocker):
+        mocker.patch.object(twitter, 'Api')
+        api = twitter.Api()
+        bark = BarkUI(api)
+        bark.tweets.append({'id': 'id1'})
+        bark.tweets.append({'id': 'id2'})
+        bark.do_heart('001')
+        api.CreateFavorite.assert_called_with(status_id='id2')
+
 
     def test_handle_command_exit(self, mocker):
         mocker.patch.object(twitter, 'Api')
