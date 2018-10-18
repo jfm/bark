@@ -67,6 +67,8 @@ class BarkUI:
                 self.refresh_stream()
             elif command == "/tweet":
                 self.do_tweet(command_words[1:])
+            elif command == "/heart":
+                self.do_heart(command_words[1])
             elif command == "/exit":
                 sys.exit()
             else:
@@ -102,6 +104,14 @@ class BarkUI:
             self.status_widget.set_status_text("Tweet send!")
         else:
             self.status_widget.set_status_text("Tweet too long (%d characters)" % len(tweet_message))
+
+    def do_heart(self, index_text):
+        try:
+            index = int(index_text)
+            self.logger.info('Hearting %d - %s' % (index, self.tweets[index]['id']))
+            self.api.CreateFavorite(status_id=self.tweets[index]['id'])
+        except ValueError:
+            self.status_widget.set_status_text('Could not heart tweet! Use Example: /heart 005')
 
     def refresh_stream(self):
         time_line_statuses = self.api.GetHomeTimeline(count=100, since_id=self.progress)
