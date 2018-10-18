@@ -105,4 +105,4 @@ class BarkUI:
 
     def refresh_stream(self):
         time_line_statuses = self.api.GetHomeTimeline(count=100, since_id=self.progress)
-        self.stream_widget.refresh_stream(time_line_statuses)
+        self.tweets = self.stream_widget.refresh_stream(time_line_statuses)
