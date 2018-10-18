@@ -52,6 +52,15 @@ class TestBarkUIClass:
         bark.do_heart('001')
         api.CreateFavorite.assert_called_with(status_id='id2')
 
+    def test_do_retweet(self, mocker):
+        mocker.patch.object(twitter, 'Api')
+        api = twitter.Api()
+        bark = BarkUI(api)
+        bark.tweets.append({'id': 'id1'})
+        bark.tweets.append({'id': 'id2'})
+        bark.do_retweet('001')
+        api.PostRetweet.assert_called_with('id2')
+
 
     def test_handle_command_exit(self, mocker):
         mocker.patch.object(twitter, 'Api')

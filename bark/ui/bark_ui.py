@@ -70,6 +70,8 @@ class BarkUI:
                 self.do_tweet(command_words[1:])
             elif command == "/heart":
                 self.do_heart(command_words[1])
+            elif command == "/retweet":
+                self.do_retweet(command_words[1])
             elif command == "/exit":
                 sys.exit()
             else:
@@ -113,6 +115,15 @@ class BarkUI:
             self.api.CreateFavorite(status_id=self.tweets[index]['id'])
         except ValueError:
             self.status_widget.set_status_text('Could not heart tweet! Use Example: /heart 005')
+
+    def do_retweet(self, index_text):
+        try:
+            index = int(index_text)
+            self.logger.info('Retweeting %d - %s' % (index, self.tweets[index]['id']))
+            self.api.PostRetweet(self.tweets[index]['id'])
+        except ValueError:
+            self.status_widget.set_status_text('Could not retweet! Use Example: /retweet 005')
+
 
     def refresh_stream(self):
         time_line_statuses = self.api.GetHomeTimeline(count=100, since_id=self.progress)
