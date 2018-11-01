@@ -12,7 +12,7 @@ class Render:
         tweet['id'] = status.id
         tweet['time'] = self.render_time(status.created_at)
         tweet['username'] = self.render_username(status.user.screen_name)
-        tweet['tweet_lines'] = self.render_text(status.text, text_width)
+        tweet['tweet_lines'] = self.render_text(status.full_text, text_width)
         return tweet
 
     def render_time(self, created_at):

@@ -32,7 +32,7 @@ class Bark:
             ACCESS_TOKEN_SECRET = bark_config.get_value('API', 'access_token_secret')
 
         if CONSUMER_KEY is not None:
-            api = twitter.Api(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET, access_token_key=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET)
+            api = twitter.Api(consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET, access_token_key=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET, tweet_mode='extended')
             barkui = BarkUI(api)
             curses.wrapper(barkui.build_ui)
         else:
