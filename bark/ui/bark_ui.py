@@ -1,6 +1,8 @@
 import shutil
 import sys
 import curses
+import threading
+import time
 from bark.config.config import BarkConfig
 from bark.util.logger import BarkLogger
 from bark.ui.title_widget import TitleWidget
@@ -47,7 +49,9 @@ class BarkUI:
         # Add Status Widget
         self.status_widget = StatusWidget(self.terminal_height-2, 0)
 
-        self.refresh_stream()
+        self.refresh_thread = threading.Thread(target=self.refresh_thread_worker)
+        self.refresh_thread.shutdown_flag = threading.Event()
+        self.refresh_thread.start()
         while True:
             command = self.command_widget.get_command(self.validate_input)
             self.handle_command(command)
@@ -73,6 +77,7 @@ class BarkUI:
             elif command == "/retweet":
                 self.do_retweet(command_words[1])
             elif command == "/exit":
+                self.refresh_thread.shutdown_flag.set()
                 sys.exit()
             else:
                 self.logger.debug('unknown command')
@@ -124,7 +129,12 @@ class BarkUI:
         except ValueError:
             self.status_widget.set_status_text('Could not retweet! Use Example: /retweet 005')
 
+    def refresh_thread_worker(self):
+        while not self.refresh_thread.shutdown_flag.is_set():
+            self.logger.debug("Refreshing")
+            self.refresh_stream()
+            time.sleep(300)
 
     def refresh_stream(self):
         time_line_statuses = self.api.GetHomeTimeline(count=100, since_id=self.progress)
-        self.tweets = self.stream_widget.refresh_stream(time_line_statuses)
+        self.tweets, self.progress = self.stream_widget.refresh_stream(time_line_statuses)
