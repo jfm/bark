@@ -50,7 +50,6 @@ class BarkUI:
         self.status_widget = StatusWidget(self.terminal_height-2, 0)
 
         self.refresh_thread = threading.Thread(target=self.refresh_thread_worker)
-        self.refresh_thread.shutdown_flag = threading.Event()
         self.refresh_thread.start()
         while True:
             command = self.command_widget.get_command(self.validate_input)
@@ -77,7 +76,6 @@ class BarkUI:
             elif command == "/retweet":
                 self.do_retweet(command_words[1])
             elif command == "/exit":
-                self.refresh_thread.shutdown_flag.set()
                 sys.exit()
             else:
                 self.logger.debug('unknown command')
@@ -130,7 +128,7 @@ class BarkUI:
             self.status_widget.set_status_text('Could not retweet! Use Example: /retweet 005')
 
     def refresh_thread_worker(self):
-        while not self.refresh_thread.shutdown_flag.is_set():
+        while True:
             self.logger.debug("Refreshing")
             self.refresh_stream()
             time.sleep(300)
